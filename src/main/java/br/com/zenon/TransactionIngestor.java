@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 public class TransactionIngestor {
 
+        public static final int FRAUD_LIMIT = 50_000;
     public List<Transaction> readNew(String file) {
 
         try{
@@ -17,7 +18,7 @@ public class TransactionIngestor {
 
             return lines.stream()
                     .skip(1)
-                    .limit(1000)
+                    .limit(FRAUD_LIMIT)
                     .map(this::parseTransaction)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
