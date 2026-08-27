@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+
+
 public class Main {
     public static void main(String[] args) {
 
@@ -43,9 +45,31 @@ public class Main {
 
         transactionTypeMap.forEach("-%s: %d"::formatted);
 
+        TransactionRepository transactionRepository;
+
+        transactionRepository = new TransactionListRepository(transactions);
+        String founfOriginName  = "C1868032458";
+
+        long startTimeList = System.nanoTime();;
+
+        transactionRepository.findByOriginName(founfOriginName)
+                .ifPresentOrElse(System.out::println, ()-> System.out.println("transacao nao encontrada: "+founfOriginName));
+
+        long endTimeList = System.nanoTime();;
+        System.out.println("tempo de busca LIST  em (ms): "+(endTimeList-startTimeList)/1_000_000.0);
+
+
+        transactionRepository = new TransactionMapRepository(transactions);
 
 
 
+        long startTimeList2 = System.nanoTime();;
+
+        transactionRepository.findByOriginName(founfOriginName)
+                .ifPresentOrElse(System.out::println, ()-> System.out.println("transacao nao encontrada: "+founfOriginName));
+
+        long endTimeList2 = System.nanoTime();;
+        System.out.println("tempo de busca MAP  em (ms): "+(endTimeList2-startTimeList2)/1_000_000.0);
 
 
 

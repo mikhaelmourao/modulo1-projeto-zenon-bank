@@ -50,6 +50,7 @@ public class FraudAnalyzer {
     public double totalDamage2(){
         return fraudStream().mapToDouble(t->t.amount().doubleValue()).sum();
     }
+
     private Stream<Transaction> fraudStream() {
         return transactions.stream()
                 .filter(Transaction::isFraud);
