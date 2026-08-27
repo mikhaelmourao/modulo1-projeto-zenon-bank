@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class TransactionIngestor {
 
-        public static final int FRAUD_LIMIT = 50_000;
+        public static final int FRAUD_LIMIT = 100_000;
     public List<Transaction> readNew(String file) {
 
         try{
