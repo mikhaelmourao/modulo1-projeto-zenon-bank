@@ -18,7 +18,7 @@ public class TransactionIngestor {
 
             return lines.stream()
                     .skip(1)
-                    .limit(FRAUD_LIMIT)
+//                    .limit(FRAUD_LIMIT)
                     .map(this::parseTransaction)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
