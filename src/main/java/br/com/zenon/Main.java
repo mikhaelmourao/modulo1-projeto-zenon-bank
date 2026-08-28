@@ -12,13 +12,23 @@ public class Main {
 
         
         List<Transaction> transactions = new TransactionIngestor().readNew("data/PS_20174392719_1491204439457_log.csv");
+        long maxMemory = Runtime.getRuntime().maxMemory();
+        System.out.println("Memória máxima da JVM: "
+                + maxMemory / 1024 / 1024 + " MB");
 
+        System.out.println("JVM args: "
+                + java.lang.management.ManagementFactory
+                .getRuntimeMXBean()
+                .getInputArguments());
+
+
+        System.out.println("SIZE original transactions:"+transactions.size());
 //        transactions.stream().limit(10).forEach(System.out::println);
 
 
         List<Transaction> transactionsBadData = new TransactionIngestor().readNew("data/paysim_with_bad_data.csv");
 
-        System.out.println(transactionsBadData.size());
+        System.out.println("SIZE bad transactions: "+transactionsBadData.size());
         transactionsBadData.forEach(System.out::println);
 
         FraudAnalyzer fraudAnalyzer = new FraudAnalyzer(transactions);
@@ -41,7 +51,7 @@ public class Main {
         Map<TransactionType, Long> transactionTypeMap = fraudAnalyzer.countFraudsByType();
         System.out.println("TOTAL TRANSACTION TYPE: "+transactionTypeMap);
 
-//        transactionTypeMap.forEach((type, count)-> System.out.println("-%s: %d".formatted(type, count)));
+        transactionTypeMap.forEach((type, count)-> System.out.println("-%s: %d".formatted(type, count)));
 
         transactionTypeMap.forEach("-%s: %d"::formatted);
 
