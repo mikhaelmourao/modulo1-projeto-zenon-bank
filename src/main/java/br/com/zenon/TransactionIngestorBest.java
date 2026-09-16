@@ -12,6 +12,7 @@ import java.util.Scanner;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -19,6 +20,7 @@ public class TransactionIngestorBest {
 
     public static final int FRAUD_LIMIT = 10_000;
     public static final int LINE_BATCH_LIMIT = 2_500;
+    private final Semaphore dbPermits = new Semaphore(10);
 
     private void executeBatch(List<String> lineBatch, Consumer<List<Transaction>> BatchConsumer){
 
@@ -29,13 +31,23 @@ public class TransactionIngestorBest {
                .map(Optional::get)
                .toList();
 
-       BatchConsumer.accept(transactionBatch);
+       try{
+           dbPermits.acquire();
+
+           try {
+               BatchConsumer.accept(transactionBatch);
+           }finally {
+               dbPermits.release();
+           }
+       } catch (InterruptedException e) {
+           Thread.currentThread().interrupt();
+       }
     }
 
     public void readAsBatch(String file, Consumer<List<Transaction>> BatchConsumer) {
 
         Path path = Path.of(file);
-        try(ExecutorService executors = Executors.newFixedThreadPool(10);
+        try(ExecutorService executors = Executors.newVirtualThreadPerTaskExecutor();
                 Stream<String> lines =  Files.lines(path).skip(1)){
 
 
@@ -55,7 +67,14 @@ public class TransactionIngestorBest {
                    System.out.println("executando batch limit..."+LINE_BATCH_LIMIT);
 
                    final List<String> currentLineBatch = List.copyOf(lineBatch);
-                   executors.submit(() -> executeBatch(currentLineBatch, BatchConsumer));
+                   executors.submit(() -> {
+                       try {
+
+                           executeBatch(currentLineBatch, BatchConsumer);
+                       } catch (Exception e) {
+                           e.printStackTrace();
+                       }
+                   });
 
                    lineBatch.clear();
                }
@@ -65,7 +84,14 @@ public class TransactionIngestorBest {
                System.out.println("executando batch final...");
 
                final List<String> currentLineBatch = List.copyOf(lineBatch);
-               executors.submit(() -> executeBatch(currentLineBatch, BatchConsumer));
+               executors.submit(() -> {
+                   try {
+
+                       executeBatch(currentLineBatch, BatchConsumer);
+                   } catch (Exception e) {
+                       e.printStackTrace();
+                   }
+               });
            }
 
         } catch (IOException e) {
