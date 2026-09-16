@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public class DBMain {
+public class DBMainBest {
 
     public static void main(String[] args) {
 
@@ -27,23 +27,26 @@ public class DBMain {
 //         ts.save(t);
 
 
-        List<Transaction> transactions = new TransactionIngestor().readNew("data/PS_20174392719_1491204439457_log.csv");
 
+        var repository = new TransactionSQLRepository();
+        var transactionIngestorBest = new TransactionIngestorBest();
 
         long startTimeSQL = System.nanoTime();;
 
-        System.out.println("SIZE transactions: "+transactions.size());
-        System.out.println("Iniciando adicao de");
+        transactionIngestorBest.readAsBatch("data/PS_20174392719_1491204439457_log.csv", ts::saveALL);
 
-        ts.saveALL(transactions);
+
+        System.out.println("Iniciando adicao de");
 
 
         long endTimeSQL = System.nanoTime();;
-        System.out.println("tempo de busca LIST  em (ms): "+(endTimeSQL-startTimeSQL)/1_000_000.0);
+        System.out.println("tempo de ingestao no BD  em (ms): "+(endTimeSQL-startTimeSQL)/1_000_000.0);
 
 
-       ts.findByOriginName("C1231006815")
-                .ifPresentOrElse(System.out::println, ()-> System.out.println("transacao nao encontrada: C1231006815"));
+
+
+
+
 
 
 
